@@ -1,0 +1,229 @@
+Main.class
+-------------
+public class Main {
+    public static void main(String[] args){
+        Tracker obj = new Tracker();
+    }
+    
+    //Initializes class Tracker on program start
+}
+
+JOP.class
+-------------
+package Main;
+
+import javax.swing.JOptionPane;
+
+public class JOP {
+
+    public static void msg(String msg) {
+        JOptionPane.showMessageDialog(null, msg);
+    }
+    
+    //Displays parameter msg in text box
+
+    public static String in(String msg){
+        return JOptionPane.showInputDialog(msg);
+    }
+    
+    //Displays parameter msg in text box and takes string input
+}
+
+
+Tracker.class
+-------------
+public class Tracker {
+
+    private boolean running = true;
+    private List _l = new List();
+
+    public Tracker() {
+        try {
+            while (running) {
+                String start = JOP.in(
+                        "Type add or remove to modify the list of hikers" +
+                                "\nType view to display hiking information" +
+                                "\nClick cancel to exit"
+                );
+                if(start.equalsIgnoreCase("add")) {
+                    _l.addHike();
+                } else if(start.equalsIgnoreCase("remove")) {
+                    _l.removeHiker();
+                } else if(start.equalsIgnoreCase("view")) {
+                    ViewStats();
+                }
+            }
+        } catch(Exception O){
+            System.exit(0);
+        }
+    }
+    
+    //Handles list of hikers and statistics
+
+    private void ViewStats() {
+        String viewChoice = JOP.in("Choose the whole list or to sort by duration");
+        if (viewChoice.equals("list")) {
+            JOP.msg(_l.listAll());
+        } else if (viewChoice.equals("duration")) {
+            String durationChoice = JOP.in("Sort by name location?");
+            if (durationChoice.equalsIgnoreCase("name")) {
+                String name = JOP.in("What is the hiker name?");
+                JOP.msg(_l.totalDurationName(name));
+            } else if (durationChoice.equalsIgnoreCase("location")) {
+                String location = JOP.in("What is the hike location?");
+                JOP.msg(_l.totalDurationLocation(location));
+            }
+        }
+    }
+    
+    //Displays statistics such as name, location and duration of hike
+}
+
+List.class
+-------------
+import java.util.ArrayList;
+
+public class List {
+
+    private ArrayList <Info> infoList;
+    private int hikeDur = 0;
+
+    public List() {
+        infoList = new ArrayList<>();
+    }
+    
+    //Instantiates infoList, which stores name, duration and location
+
+    public void addHike() {
+        String name = JOP.in("Enter the name");
+        String location = JOP.in("Enter the location");
+        boolean running = true;
+        while (running){
+            try {
+                String duration = JOP.in("Enter the duration");
+                hikeDur = Integer.parseInt(duration);
+            } catch (Exception P) {
+                JOP.msg("Invalid input");
+            }
+            running = false;
+        }
+        if(this.infoList.size() == 0) {
+            this.infoList.add(new Info(name, location, hikeDur));
+        }
+        else if (this.infoList.size() != 0) {
+            boolean unsorted = true;
+            for(int i = 0; i < this.infoList.size(); i++) {
+                if(name.compareToIgnoreCase(this.infoList.get(i).getName()) <= 0 && unsorted) {
+                    this.infoList.add(i, new Info(name, location, hikeDur));
+                    unsorted = false;
+                }
+            }
+
+            if(unsorted) {
+                this.infoList.add(new Info(name, location, hikeDur));
+            }
+        }
+    }
+    
+    //Adds a sorted hike to the infoList
+
+    public void removeHiker() {
+        int counter = 0;
+        String name = JOP.in("What is the name?");
+        for(int i = this.infoList.size()- 1; i >= 0; i--) {
+            if(name.equalsIgnoreCase(this.infoList.get(i).getName())) {
+                infoList.remove(i);
+                counter++;
+            }
+        }
+        if(counter == 0){ JOP.msg("Nothing was removed"); }
+        else{ JOP.msg(counter + " number of hikers were removed"); }
+    }
+    
+    //Removes a hiker from list based on name
+
+    public String listAll() {
+        String total = "";
+        if(this.infoList.size() == 0){
+            return "No hikers yet";
+        }
+        for(int i = 0; i < this.infoList.size(); i++) {
+            total += "\n" + infoList.get(i).toString();
+        }
+        return total;
+    }
+    
+    //Lists all the hikers or outputs "No hikers yet" if infoList is empty
+
+    public String totalDurationName(String hikeName) {
+        int total = 0;
+        if(this.infoList.size() == 0){
+            return "No data yet";
+        }
+        for(int i = 0; i < this.infoList.size(); i++) {
+            if(infoList.get(i).getName().equalsIgnoreCase(hikeName)) {
+                total += infoList.get(i).getTime();
+            }
+        }
+        return "" + total;
+    }
+    
+    //Searches for all hikes by hikeName name and outputs the total duration
+
+    public String totalDurationLocation(String hikeLocation) {
+        int total = 0;
+        if(this.infoList.size() == 0){
+            return "No data yet";
+        }
+        for(int i = 0; i < this.infoList.size(); i++) {
+            if(infoList.get(i).getLocation().equalsIgnoreCase(hikeLocation)) {
+                total += infoList.get(i).getTime();
+            }
+        }
+        return "" + total;
+    }
+    
+    //Searches for all hikes by hikeLocation location and outputs the total duration 
+}
+
+Info class
+-------------
+public class Info {
+
+    String name;
+    String location;
+    int duration;
+
+    public Info(String hikeName, String hikeLocation, int hikeDuration) {
+
+        name = hikeName;
+        location = hikeLocation;
+        duration = hikeDuration;
+
+    }
+    
+    //Assigns values to name, location and duration from parameters
+
+    public String getName() {
+        return name;
+    }
+    
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getDuration() {
+        return duration + "";
+    }
+
+    public int getTime() {
+        return duration;
+    }
+
+    public String toString() {
+        return getName() + " " + getLocation() + " " + getDuration() + " ";
+    }
+    
+    //Outputs name, location then duration in string form
+}
